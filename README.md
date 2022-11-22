@@ -6,9 +6,10 @@ Adds Enchanting Mechanics and API.
 
 ## Features
 
+* does not add new tools/items, it's using MT API to change existing items instead
 * adds enchanting table
 * supports all registered tools with known tool groups: pickaxe, shovel, axe, sword, e.g. `groups = {pickaxe = 1}`
-* support all bows with group `{bow = 1}`
+* supports all bows with group `{bow = 1}`
 * supports `default:bookshelf` or anything with `group:bookshelf`
 * enchanting trade is for `default:mese_crystal` or anything with `groups = {enchanting_trade = 1}`
 * adds enchantability for all MT default tools, for custom tools the enchantability can be set in the item group, e.g. `groups = {enchantability = 15}`
@@ -215,7 +216,7 @@ GNU Lesser General Public License v2.1 or later (see included LICENSE file)
 - x_enchanting_symbol_25.png
 - x_enchanting_symbol_26.png
 
-**LGPL-2.1-or-later, by SaKeL**
+**CC-BY-SA-4.0, by SaKeL**
 
 - x_enchanting_image_button_disabled.png
 - x_enchanting_image_button.png
@@ -234,7 +235,7 @@ GNU Lesser General Public License v2.1 or later (see included LICENSE file)
 
 ### Models
 
-**LGPL-2.1-or-later, by SaKeL**
+**CC-BY-SA-4.0, by SaKeL**
 
 - x_enchanting_scroll.b3d
 - x_enchanting_table.obj
