@@ -187,7 +187,7 @@ GNU Lesser General Public License v2.1 or later (see included LICENSE file)
 
 ### Textures
 
-**CC BY-SA 4.0, Pixel Perfection by XSSheep**, https://minecraft.curseforge.com/projects/pixel-perfection-freshly-updated
+**CC-BY-SA-4.0, Pixel Perfection by XSSheep**, https://minecraft.curseforge.com/projects/pixel-perfection-freshly-updated
 
 - x_enchanting_symbol_1.png
 - x_enchanting_symbol_2.png
@@ -227,11 +227,11 @@ GNU Lesser General Public License v2.1 or later (see included LICENSE file)
 - x_enchanting_scroll_mesh.png -- Derived from a texture TumeniNodes (CC BY-SA 3.0)
 - x_enchanting_scroll_particle.png
 - x_enchanting_table.png
-- x_enchanting_gui_slot_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC BY-SA 4.0)
-- x_enchanting_gui_cloth_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC BY-SA 4.0)
-- x_enchanting_gui_cloth_trade_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC BY-SA 4.0)
-- x_enchanting_gui_formbg.png -- Derived from texture Pixel Perfection by XSSheep (CC BY-SA 4.0)
-- x_enchanting_gui_hb_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC BY-SA 4.0)
+- x_enchanting_gui_slot_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC-BY-SA-4.0)
+- x_enchanting_gui_cloth_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC-BY-SA-4.0)
+- x_enchanting_gui_cloth_trade_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC-BY-SA-4.0)
+- x_enchanting_gui_formbg.png -- Derived from texture Pixel Perfection by XSSheep (CC-BY-SA-4.0)
+- x_enchanting_gui_hb_bg.png -- Derived from texture Pixel Perfection by XSSheep (CC-BY-SA-4.0)
 
 ### Models
 
