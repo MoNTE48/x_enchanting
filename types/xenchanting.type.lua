@@ -50,5 +50,5 @@
 ---@class EnchantmentDataSlot
 ---@field level number
 ---@field final_enchantments Enchantment[]
----@field tool_cap_data ToolCapabilitiesDef
+---@field tool_cap_data ToolCapabilitiesDef | nil
 ---@field descriptions {["enchantments_desc"]: string, ["enchantments_desc_masked"]: string }

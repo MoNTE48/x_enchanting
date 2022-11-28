@@ -1,5 +1,20 @@
--- X Enchanting
--- by SaKeL
+--[[
+    X Enchanting. Adds Enchanting Mechanics and API.
+    Copyright (C) 2022 SaKeL <juraj.vajda@gmail.com>
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to juraj.vajda@gmail.com
+--]]
 
 local path = minetest.get_modpath('x_enchanting')
 local mod_start_time = minetest.get_us_time()
@@ -156,6 +171,7 @@ minetest.register_on_mods_loaded(function()
     end
 end)
 
+---@diagnostic disable-next-line: unused-local
 minetest.register_on_joinplayer(function(player, last_login)
     XEnchanting.form_context[player:get_player_name()] = nil
 
@@ -164,6 +180,7 @@ minetest.register_on_joinplayer(function(player, last_login)
     end
 end)
 
+---@diagnostic disable-next-line: unused-local
 minetest.register_on_leaveplayer(function(player, timed_out)
     XEnchanting.form_context[player:get_player_name()] = nil
 end)
@@ -229,6 +246,7 @@ function minetest.handle_node_drops(pos, drops, digger)
     return old_handle_node_drops(pos, drops, digger)
 end
 
+---@diagnostic disable-next-line: unused-local
 minetest.register_on_player_hpchange(function(player, hp_change, reason)
     -- Curse of Vanishing
     if (player:get_hp() + hp_change) <= 0 then

@@ -45,6 +45,7 @@
 ---@field get_rotation fun(self: ObjectRef): Vector returns the rotation, a vector (radians)
 ---@field get_attach fun(self: ObjectRef): any Returns parent, bone, position, rotation, forced_visible, or nil if it isn't attached.
 ---@field set_attach fun(self: ObjectRef, parent: ObjectRef, bone?: string, position?: Vector, rotation?: Vector, forced_visible?: boolean): any Returns parent, bone, position, rotation, forced_visible, or nil if it isn't attached.
+---@field drops table Custom for mob drops
 
 ---`ObjectRef` armor groups
 ---@class ObjectRefArmorGroups

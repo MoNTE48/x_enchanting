@@ -1,3 +1,22 @@
+--[[
+    X Enchanting. Adds Enchanting Mechanics and API.
+    Copyright (C) 2022 SaKeL <juraj.vajda@gmail.com>
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to juraj.vajda@gmail.com
+--]]
+
+---@diagnostic disable-next-line
 screwdriver = minetest.global_exists('screwdriver') and screwdriver --[[@as MtgScrewdriver]]
 
 local S = minetest.get_translator(minetest.get_current_modname())
@@ -59,6 +78,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param placer ObjectRef | nil
     ---@param itemstack ItemStack
     ---@param pointed_thing PointedThingDef
+    ---@diagnostic disable-next-line: unused-local
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         local meta = minetest.get_meta(pos)
 
@@ -79,6 +99,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param clicker ObjectRef
     ---@param itemstack ItemStack
     ---@param pointed_thing? PointedThingDef
+    ---@diagnostic disable-next-line: unused-local
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         local meta = minetest.get_meta(pos)
         local p_name = clicker:get_player_name()
@@ -123,6 +144,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param pos Vector
     ---@param intensity? number
     ---@return table | nil
+    ---@diagnostic disable-next-line: unused-local
     on_blast = function(pos, intensity)
         if minetest.is_protected(pos, '') then
             return
@@ -159,11 +181,13 @@ minetest.register_node('x_enchanting:table', {
             and inv:is_empty('trade')
             and not minetest.is_protected(pos, player:get_player_name())
     end,
+    ---@diagnostic disable-next-line: unused-local
     on_rotate = function(pos, node, user, mode, new_param2)
         return false
     end,
     ---@param pos Vector
     ---@param elapsed number
+    ---@diagnostic disable-next-line: unused-local
     on_timer = function(pos, elapsed)
         -- entity
         local table_scroll = minetest.get_objects_inside_radius(pos, 0.9)
@@ -234,6 +258,7 @@ minetest.register_node('x_enchanting:table', {
         end
 
         -- symbol particles
+        ---@diagnostic disable-next-line: unused-local
         for i = 1, 10, 1 do
             local pos_random = bookshelfs[math.random(1, #bookshelfs)]
             local x = pos.x - pos_random.x
@@ -275,6 +300,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param index number
     ---@param stack ItemStack
     ---@param player ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     allow_metadata_inventory_put = function(pos, listname, index, stack, player)
         local st_meta = stack:get_meta()
         local st_name = stack:get_name()
@@ -302,6 +328,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param index number
     ---@param stack ItemStack
     ---@param player ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     allow_metadata_inventory_take = function(pos, listname, index, stack, player)
         local st_name = stack:get_name()
 
@@ -325,6 +352,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param to_index number
     ---@param count number
     ---@param player ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
         return 0
     end,
@@ -333,6 +361,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param index number
     ---@param stack ItemStack
     ---@param player ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
         local meta = minetest.get_meta(pos)
         local p_name = player:get_player_name()
@@ -368,6 +397,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param index number
     ---@param stack ItemStack
     ---@param player ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
         local meta = minetest.get_meta(pos)
         local p_name = player:get_player_name()
@@ -403,6 +433,7 @@ minetest.register_node('x_enchanting:table', {
     ---@param formname string
     ---@param fields table
     ---@param sender ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     on_receive_fields = function(pos, formname, fields, sender)
         local p_name = sender:get_player_name()
 
@@ -481,12 +512,14 @@ minetest.register_entity('x_enchanting:table_scroll', {
     },
     ---@param self table
     ---@param killer ObjectRef
+    ---@diagnostic disable-next-line: unused-local
     on_death = function(self, killer)
         self.object:remove()
     end,
     ---@param self table
     ---@param staticdata StringAbstract
     ---@param dtime_s number
+    ---@diagnostic disable-next-line: unused-local
     on_activate = function(self, staticdata, dtime_s)
         self._scroll_closed = true
         self._tablechecktimer = 5
@@ -500,6 +533,7 @@ minetest.register_entity('x_enchanting:table_scroll', {
     ---@param self table
     ---@param dtime number
     ---@param moveresult? table
+    ---@diagnostic disable-next-line: unused-local
     on_step = function(self, dtime, moveresult)
         local pos = self.object:get_pos()
 
@@ -528,6 +562,7 @@ minetest.register_entity('x_enchanting:table_scroll', {
             local found_player = false
 
             if #objects > 0 then
+                ---@diagnostic disable-next-line: unused-local
                 for i, obj in ipairs(objects) do
                     if obj:is_player() and obj:get_pos() then
                         -- player
@@ -589,6 +624,7 @@ minetest.register_entity('x_enchanting:table_scroll', {
     ---@param dir Vector
     ---@param damage number
     ---@return boolean | nil
+    ---@diagnostic disable-next-line: unused-local
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir, damage)
         return true
     end

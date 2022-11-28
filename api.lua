@@ -1,3 +1,21 @@
+--[[
+    X Enchanting. Adds Enchanting Mechanics and API.
+    Copyright (C) 2022 SaKeL <juraj.vajda@gmail.com>
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to juraj.vajda@gmail.com
+--]]
+
 local S = minetest.get_translator(minetest.get_current_modname())
 
 ---@type XEnchanting
@@ -288,6 +306,7 @@ local function get_table_length(table)
     return length
 end
 
+---@diagnostic disable-next-line: unused-local
 function XEnchanting.has_tool_group(self, name)
     if minetest.get_item_group(name, 'pickaxe') > 0 then
         return 'pickaxe'
@@ -321,10 +340,12 @@ function XEnchanting.set_tool_enchantability(self, tool_def)
     })
 end
 
+---@diagnostic disable-next-line: unused-local
 function XEnchanting.get_enchanted_tool_capabilities(self, tool_def, enchantments)
     local tool_stack = ItemStack({ name = tool_def.name })
     local tool_capabilities = tool_stack:get_tool_capabilities()
 
+    ---@diagnostic disable-next-line: unused-local
     for i, enchantment in ipairs(enchantments) do
         -- Efficiency
         if enchantment.id == 'efficiency' then
@@ -439,6 +460,7 @@ function XEnchanting.get_enchanted_tool_capabilities(self, tool_def, enchantment
     return tool_capabilities
 end
 
+---@diagnostic disable-next-line: unused-local
 function XEnchanting.get_randomseed(self)
     return tonumber(tostring(os.time()):reverse():sub(1, 9)) --[[@as integer]]
 end
@@ -447,6 +469,7 @@ function XEnchanting.get_enchanted_descriptions(self, enchantments)
     local enchantments_desc = {}
     local enchantments_desc_masked = {}
 
+    ---@diagnostic disable-next-line: unused-local
     for i, enchantment in ipairs(enchantments) do
         local add_roman_numbers = true
 
@@ -503,6 +526,7 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
     ---@type table<string, {["value"]: number}>
     local final_enchantments_meta = {}
 
+    ---@diagnostic disable-next-line: unused-local
     for i, enchantment in ipairs(final_enchantments) do
         stack_meta:set_float('is_' .. enchantment.id, enchantment.value)
         -- store only necessary data, keeping the meta optimized
@@ -611,6 +635,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
         if not enchantment_def.groups then
             group_enchantments[enchantment_name] = enchantment_def
         else
+            ---@diagnostic disable-next-line: unused-local
             for i, group in ipairs(enchantment_def.groups) do
                 if minetest.get_item_group(tool_def.name, group) > 0 then
                     group_enchantments[enchantment_name] = enchantment_def
@@ -697,6 +722,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
         local total_weight = 0
 
         -- calculate total weight
+        ---@diagnostic disable-next-line: unused-local
         for j, enchantment in ipairs(possible_enchantments) do
             total_weight = total_weight + self.enchantment_defs[enchantment.id].weight
         end
