@@ -62,8 +62,12 @@ XEnchanting = {
             },
             weight = 10,
             groups = {
-                'sword'
-            }
+                'sword',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 1,
+            multiplier_from_item = 1
         },
         looting = {
             name = S('Looting'),
@@ -81,8 +85,12 @@ XEnchanting = {
             },
             weight = 2,
             groups = {
-                'sword'
-            }
+                'sword',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 2,
+            multiplier_from_item = 4
         },
         fortune = {
             name = S('Fortune'),
@@ -102,9 +110,13 @@ XEnchanting = {
             groups = {
                 'pickaxe',
                 'shovel',
-                'axe'
+                'axe',
+                'book',
+                'scroll'
             },
-            incompatible = { 'silk_touch' }
+            incompatible = { 'silk_touch' },
+            multiplier_from_scroll = 2,
+            multiplier_from_item = 4
         },
         unbreaking = {
             name = S('Unbreaking'),
@@ -122,7 +134,9 @@ XEnchanting = {
             },
             weight = 5,
             -- all applicable
-            groups = nil
+            groups = nil,
+            multiplier_from_scroll = 1,
+            multiplier_from_item = 2
         },
         efficiency = {
             name = S('Efficiency'),
@@ -132,7 +146,7 @@ XEnchanting = {
                 [2] = { 11, 61 },
                 [3] = { 21, 71 },
                 [4] = { 31, 81 },
-                [5] = { 41, 91 },
+                -- [5] = { 41, 91 },
             },
             -- level definition, `level = percentage increase`
             level_def = {
@@ -140,14 +154,18 @@ XEnchanting = {
                 [2] = 30,
                 [3] = 35,
                 [4] = 40,
-                [5] = 45,
+                -- [5] = 45,
             },
             weight = 10,
             groups = {
                 'pickaxe',
                 'shovel',
-                'axe'
-            }
+                'axe',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 1,
+            multiplier_from_item = 1
         },
         silk_touch = {
             name = S('Silk Touch'),
@@ -162,9 +180,13 @@ XEnchanting = {
             groups = {
                 'pickaxe',
                 'shovel',
-                'axe'
+                'axe',
+                'book',
+                'scroll'
             },
-            incompatible = { 'fortune' }
+            incompatible = { 'fortune' },
+            multiplier_from_scroll = 4,
+            multiplier_from_item = 8
         },
         curse_of_vanishing = {
             name = S('Curse of Vanishing'),
@@ -177,7 +199,9 @@ XEnchanting = {
             weight = 1,
             secondary = true,
             -- all applicable
-            groups = nil
+            groups = nil,
+            multiplier_from_scroll = 4,
+            multiplier_from_item = 8
         },
         knockback = {
             name = S('Knockback'),
@@ -192,8 +216,12 @@ XEnchanting = {
             },
             weight = 5,
             groups = {
-                'sword'
-            }
+                'sword',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 1,
+            multiplier_from_item = 2
         },
         power = {
             -- Increases arrow damage.
@@ -216,8 +244,12 @@ XEnchanting = {
             },
             weight = 10,
             groups = {
-                'bow'
-            }
+                'bow',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 1,
+            multiplier_from_item = 1
         },
         punch = {
             -- Increases arrow knockback.
@@ -234,8 +266,12 @@ XEnchanting = {
             },
             weight = 2,
             groups = {
-                'bow'
-            }
+                'bow',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 2,
+            multiplier_from_item = 4
         },
         infinity = {
             -- Prevents regular arrows from being consumed when shot.
@@ -252,8 +288,12 @@ XEnchanting = {
             weight = 1,
             secondary = true,
             groups = {
-                'bow'
-            }
+                'bow',
+                'book',
+                'scroll'
+            },
+            multiplier_from_scroll = 4,
+            multiplier_from_item = 8
         },
     },
     form_context = {},
@@ -299,12 +339,14 @@ function XEnchanting.has_tool_group(self, name)
         return 'sword'
     elseif minetest.get_item_group(name, 'bow') > 0 then
         return 'bow'
+    elseif minetest.get_item_group(name, 'book') > 0 then
+        return 'book'
     end
 
     return false
 end
 
-function XEnchanting.set_tool_enchantability(self, tool_def)
+function XEnchanting.set_enchantability(self, tool_def)
     if minetest.get_item_group(tool_def.name, 'enchantability') > 0 then
         -- enchantability is already set, we dont need to override the item
         return
@@ -485,40 +527,49 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
     local data = self.form_context[player_name].data
 
     if not data then
+        minetest.log('warning', '[set_enchanted_tool] no data from form context found.')
         return
+    end
+
+    local tool_def = minetest.registered_tools[itemstack:get_name()]
+        or minetest.registered_craftitems[itemstack:get_name()]
+
+    if minetest.get_item_group(tool_def.name, 'book') > 0 then
+        itemstack = ItemStack({ name = 'x_enchanting:scroll_item' })
     end
 
     local capabilities = data.slots[level].tool_cap_data
     local description = data.slots[level].descriptions.enchantments_desc
     local final_enchantments = data.slots[level].final_enchantments
     local inv = minetest.get_meta(pos):get_inventory()
-    local tool_def = minetest.registered_tools[itemstack:get_name()]
     local node_meta = minetest.get_meta(pos)
 
     if not tool_def then
+        minetest.log(
+            'warning',
+            '[set_enchanted_tool] no tool definition found in registered_tools/registered_craftitems.'
+        )
         return
     end
 
     local stack_meta = itemstack:get_meta()
-    ---@type table<string, {["value"]: number}>
-    local final_enchantments_meta = {}
+    if minetest.get_item_group(tool_def.name, 'book') == 0 then
+        for i, enchantment in ipairs(final_enchantments) do
+            stack_meta:set_float('is_' .. enchantment.id, enchantment.value)
+        end
 
-    for i, enchantment in ipairs(final_enchantments) do
-        stack_meta:set_float('is_' .. enchantment.id, enchantment.value)
-        -- store only necessary data, keeping the meta optimized
-        final_enchantments_meta[enchantment.id] = {
-            value = enchantment.value
-        }
+        stack_meta:set_tool_capabilities(capabilities)
     end
 
-    stack_meta:set_tool_capabilities(capabilities)
     stack_meta:set_string('description', itemstack:get_description() .. '\n' .. description)
     stack_meta:set_string('short_description', S('Enchanted') .. ' ' .. itemstack:get_short_description())
     stack_meta:set_int('is_enchanted', 1)
-    stack_meta:set_string('x_enchanting', minetest.serialize(final_enchantments_meta))
+    stack_meta:set_string('x_enchanting', minetest.serialize(final_enchantments))
 
+    -- set new item ItemStack
     inv:set_stack('item', 1, itemstack)
 
+    -- set new trade ItemStack
     local trade_stack = inv:get_stack('trade', 1)
     trade_stack:take_item(level)
     inv:set_stack('trade', 1, trade_stack)
@@ -526,9 +577,11 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
     -- set new seed
     self.player_seeds[player_name] = self:get_randomseed()
 
+    -- update node formspec
     local formspec = self:get_formspec(pos, player_name)
     node_meta:set_string('formspec', formspec)
 
+    -- play sound
     minetest.sound_play('x_enchanting_enchant', {
         gain = 0.3,
         pos = pos,
@@ -586,6 +639,48 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
     end
 
     minetest.add_particlespawner(particlespawner_def)
+end
+
+function XEnchanting.get_enchantments_for_group(self, item_name, meta_enchantments)
+    local enchantment_defs = table.copy(self.enchantment_defs)
+    local group_enchantments = {}
+    local total_cost = 0
+
+    if meta_enchantments and #meta_enchantments > 0 then
+        enchantment_defs = {}
+
+        for i, def in pairs(meta_enchantments) do
+            if self.enchantment_defs[def.id] then
+                enchantment_defs[def.id] = self.enchantment_defs[def.id]
+            end
+        end
+    end
+
+    for enchantment_id, enchantment_def in pairs(enchantment_defs) do
+        local is_group_compatible = false
+
+        if not enchantment_def.groups then
+            group_enchantments[enchantment_id] = enchantment_def
+            is_group_compatible = true
+        else
+            for i, group in ipairs(enchantment_def.groups) do
+                if minetest.get_item_group(item_name, group) > 0 then
+                    group_enchantments[enchantment_id] = enchantment_def
+                    is_group_compatible = true
+                    break
+                end
+            end
+        end
+
+        if not is_group_compatible then
+            total_cost = total_cost + 1
+        end
+    end
+
+    return {
+        group_enchantments = group_enchantments,
+        writing_table_cost = total_cost
+    }
 end
 
 function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_def)
@@ -904,6 +999,341 @@ function XEnchanting.get_formspec(self, pos, player_name, data)
         data = data,
         pos = pos
     }
+
+    return table.concat(formspec, '')
+end
+
+function XEnchanting.get_writing_table_total_data(self, props)
+    local inv = props.inv
+    -- item
+    local stack_item = inv:get_stack('item', 1)
+    local stack_item_meta = stack_item:get_meta()
+    local table_uses_item = stack_item_meta:get_int('x_enchanting_writing_table_uses')
+    print('table_uses_item', table_uses_item)
+    local prior_use_penalty_item = 2 ^ table_uses_item - 1
+    local enchantments_item = minetest.deserialize(stack_item_meta:get_string('x_enchanting')) or {}
+    -- sacrifice
+    local stack_sacrifice = inv:get_stack('sacrifice', 1)
+    local stack_sacrifice_meta = stack_sacrifice:get_meta()
+    local table_uses_sacrifice = stack_sacrifice_meta:get_int('x_enchanting_writing_table_uses')
+    print('table_uses_sacrifice', table_uses_sacrifice)
+    local prior_use_penalty_sacrifice = 2 ^ table_uses_sacrifice - 1
+    local enchantments_sacrifice = minetest.deserialize(stack_sacrifice_meta:get_string('x_enchanting')) or {}
+    local new_x_enchanting_writing_table_uses = table_uses_item
+
+    if table_uses_sacrifice > new_x_enchanting_writing_table_uses then
+        new_x_enchanting_writing_table_uses = table_uses_sacrifice
+    end
+
+    print('enchantments_sacrifice', dump(enchantments_sacrifice))
+
+    local result_data = {
+        -- Prior Work penalties of both target and sacrifice.
+        total_cost = prior_use_penalty_item + prior_use_penalty_sacrifice,
+        show_total_cost = true,
+        show_crossed_arrow = false
+    }
+
+    if stack_sacrifice:is_empty() or stack_item:is_empty() then
+        result_data.show_total_cost = false
+
+        if not (stack_sacrifice:is_empty() and stack_item:is_empty()) then
+            result_data.show_crossed_arrow = true
+            inv:set_stack('result', 1, ItemStack(''))
+        end
+
+        return result_data
+    end
+
+    -- total cost
+    -- If the sacrifice has enchantments, the enchantment cost.
+    -- get enchantment defs for item group
+    -- Add one level cost for every incompatible enchantment on the target
+    local enchantment_defs_for_group = self:get_enchantments_for_group(stack_item:get_name(), enchantments_sacrifice)
+    local possible_enchantments_defs = enchantment_defs_for_group.group_enchantments
+
+    result_data.total_cost = result_data.total_cost + enchantment_defs_for_group.writing_table_cost
+
+    -- remove incompatible enchantments
+    -- Add one level cost for every incompatible enchantment on the target
+    for enchanment_id, enchanment_def in pairs(table.copy(possible_enchantments_defs)) do
+        if enchanment_def.incompatible then
+            for _, enchantment in ipairs(enchantments_item) do
+                if table.indexof(enchanment_def.incompatible, enchantment.id) ~= -1 then
+                    possible_enchantments_defs[enchanment_id] = nil
+                    result_data.total_cost = result_data.total_cost + 1
+                end
+            end
+        end
+    end
+
+    -- reduce/sync current sacrifice enchantmets
+    local enchantments_sacrifice_copy = table.copy(enchantments_sacrifice)
+    enchantments_sacrifice = {}
+
+    for i, enchantment in ipairs(enchantments_sacrifice_copy) do
+        if possible_enchantments_defs[enchantment.id] then
+            table.insert(enchantments_sacrifice, enchantment)
+        end
+    end
+
+    print('enchantments_sacrifice', dump(enchantments_sacrifice))
+    print('enchantments_item', dump(enchantments_item))
+    local final_enchantments = {}
+
+    -- If the enchantment is compatible with the existing enchantments on the target:
+    -- add the final level of the enchantment on the resulting item multiplied by the multiplier from the table
+    for i, enchantment_sacrifice in ipairs(enchantments_sacrifice) do
+        local enchantment_upgraded = false
+        local multiplier = possible_enchantments_defs[enchantment_sacrifice.id].multiplier_from_item
+
+        if minetest.get_item_group(stack_sacrifice:get_name(), 'scroll') > 0 then
+            multiplier = possible_enchantments_defs[enchantment_sacrifice.id].multiplier_from_scroll
+        end
+
+        print('multiplier', multiplier)
+
+        for _, enchantment_item in ipairs(enchantments_item) do
+            print(enchantment_item.id .. ' == ' .. enchantment_sacrifice.id)
+            if enchantment_item.id == enchantment_sacrifice.id then
+                -- upgrade
+                print('--- upgrade')
+                print('enchantment_item', dump(enchantment_item))
+                print('enchantment_sacrifice', dump(enchantment_sacrifice))
+
+                if enchantment_sacrifice.level == enchantment_item.level then
+                    local new_level = enchantment_sacrifice.level + 1
+                    local max_level = #possible_enchantments_defs[enchantment_sacrifice.id].final_level_range
+
+                    if new_level > max_level then
+                        -- maximum level reached, still add the cost though
+                        new_level = max_level
+                    end
+
+                    table.insert(final_enchantments, {
+                        id = enchantment_sacrifice.id,
+                        level = new_level,
+                        value = possible_enchantments_defs[enchantment_sacrifice.id].level_def[new_level],
+                        secondary = enchantment_sacrifice.secondary,
+                        incompatible = enchantment_sacrifice.incompatible
+                    })
+
+                    -- upgrade 1 level up if not already on max level
+                    print(enchantment_item.id, 'upgrade 1 level up')
+                    result_data.total_cost = result_data.total_cost + multiplier * new_level
+                elseif enchantment_sacrifice.level > enchantment_item.level then
+                    -- upgrade to sacrifice level
+                    print(enchantment_item.id, 'upgrade to' .. enchantment_sacrifice.level .. ' levels up')
+
+                    table.insert(final_enchantments, {
+                        id = enchantment_sacrifice.id,
+                        level = enchantment_sacrifice.level,
+                        value =
+                            possible_enchantments_defs[enchantment_sacrifice.id].level_def[enchantment_sacrifice.level],
+                        secondary = enchantment_sacrifice.secondary,
+                        incompatible = enchantment_sacrifice.incompatible
+                    })
+
+                    result_data.total_cost = result_data.total_cost + multiplier * enchantment_sacrifice.level
+                else
+                    -- dont change enchantment on item but add cost for it
+                    table.insert(final_enchantments, enchantment_item)
+                    result_data.total_cost = result_data.total_cost + multiplier * enchantment_item.level
+                end
+
+                enchantment_upgraded = true
+            end
+        end
+
+        if not enchantment_upgraded then
+            -- add
+            print('--- add')
+            print('enchantment_sacrifice', dump(enchantment_sacrifice))
+
+            table.insert(final_enchantments, enchantment_sacrifice)
+            result_data.total_cost = result_data.total_cost + multiplier * enchantment_sacrifice.level
+        end
+    end
+
+    print('final_enchantments 1', dump(final_enchantments))
+
+    if #final_enchantments == 0 then
+        result_data.show_total_cost = false
+        result_data.show_crossed_arrow = true
+        inv:set_stack('result', 1, ItemStack(''))
+
+        return result_data
+    end
+
+    -- add remaining enchantments from the item
+    for i, enchantment_item in ipairs(enchantments_item) do
+        local has_item = false
+        for j, enchantment_sacrifice in ipairs(enchantments_sacrifice) do
+            if enchantment_item.id == enchantment_sacrifice.id then
+                has_item = true
+            end
+        end
+
+        if not has_item then
+            table.insert(final_enchantments, enchantment_item)
+        end
+    end
+
+    print('final_enchantments 2', dump(final_enchantments))
+
+
+    if inv:is_empty('item') and not inv:is_empty('sacrifice')
+        or inv:is_empty('sacrifice') and not inv:is_empty('item')
+        or inv:is_empty('trade')
+        or #final_enchantments == 0
+    then
+        result_data.show_crossed_arrow = true
+        inv:set_stack('result', 1, ItemStack(''))
+    end
+
+    if inv:is_empty('item') or inv:is_empty('sacrifice')
+        or #final_enchantments == 0
+    then
+        result_data.show_total_cost = false
+    end
+
+    result_data.enchantments = final_enchantments
+
+    print('result_data', dump(result_data))
+
+    local tool_cap_data = self:get_enchanted_tool_capabilities(
+        minetest.registered_tools[stack_item:get_name()] or minetest.registered_craftitems[stack_item:get_name()],
+        final_enchantments
+    )
+    local descriptions = self:get_enchanted_descriptions(final_enchantments)
+    local stack_result = ItemStack(stack_item:to_table())
+    local stack_result_meta = stack_result:get_meta()
+
+    print('short_description', stack_result:get_short_description())
+
+    if not stack_item:is_empty() and minetest.get_item_group(stack_item:get_name(), 'scroll') == 0 then
+        -- for i, enchantment in ipairs(final_enchantments) do
+        --     stack_meta:set_float('is_' .. enchantment.id, enchantment.value)
+        -- end
+
+        print('tool_cap_data', dump(tool_cap_data))
+        print('stack_result', dump(stack_result:to_table()))
+        stack_result_meta:set_tool_capabilities(tool_cap_data)
+    end
+
+    print('new_x_enchanting_writing_table_uses 1', new_x_enchanting_writing_table_uses)
+    stack_result_meta:set_int('x_enchanting_writing_table_uses', new_x_enchanting_writing_table_uses + 1)
+    print('new_x_enchanting_writing_table_uses 2', stack_result_meta:get_int('x_enchanting_writing_table_uses'))
+    stack_result_meta:set_string(
+        'description',
+        stack_result:get_short_description() .. '\n' .. descriptions.enchantments_desc
+    )
+    stack_result_meta:set_string('x_enchanting', minetest.serialize(final_enchantments))
+
+    inv:set_stack('result', 1, stack_result)
+
+    return result_data
+end
+
+function XEnchanting.get_formspec_writing_table(self, pos, props)
+    local spos = pos.x .. ',' .. pos.y .. ',' .. pos.z
+    local inv = minetest.get_meta(pos):get_inventory()
+    ---@diagnostic disable-next-line: codestyle-check
+    local model_scroll_open = 'model[0,0;2,3;x_enchanting_table;x_enchanting_scroll.b3d;x_enchanting_scroll_mesh.png,x_enchanting_scroll_handles_mesh.png,x_enchanting_scroll_mesh.png;89,0;false;false;' .. self.scroll_animations.scroll_open_idle[1].x .. ',' .. self.scroll_animations.scroll_open_idle[1].y .. ';0]'
+    ---@diagnostic disable-next-line: codestyle-check
+    local model_scroll_closed = 'model[0,0;2,3;x_enchanting_table;x_enchanting_scroll.b3d;x_enchanting_scroll_mesh.png,x_enchanting_scroll_handles_mesh.png,x_enchanting_scroll_mesh.png;89,0;false;false;' .. self.scroll_animations.scroll_closed_idle[1].x .. ',' .. self.scroll_animations.scroll_closed_idle[1].y .. ';0]'
+    local model_scroll_is_open
+
+    local player_name = props.player_name
+    local data = props.data or {}
+    local show_crossed_arrow = props.data.show_crossed_arrow
+    local show_total_cost = props.data.show_total_cost
+
+    local formspec = {
+        'size[8,9]',
+        'bgcolor[#080808BB;true]',
+        'listcolors[#FFFFFF00;#FFFFFF1A;#FFFFFF00;#30434C;#FFF]',
+        get_formspec_bg(player_name),
+        'style_type[label;font=mono,bold]',
+        'style[slot_1,slot_2,slot_3;font=mono,bold;textcolor=#4D413A]',
+        'label[0, 0;' .. S('Enchant') .. ']',
+        -- item
+        'list[nodemeta:' .. spos .. ';item;2.75, 0.5;1, 1;]',
+        'image[2.75, 0.5;1,1;x_enchanting_gui_paper_bg.png]',
+        'image[3.75, 0.5;1,1;x_enchanting_gui_plus_icon.png]',
+        -- sacrifice
+        'list[nodemeta:' .. spos .. ';sacrifice;4.75, 0.5;1, 1;]',
+        'image[4.75, 0.5;1,1;x_enchanting_gui_paper_scroll_bg.png]',
+        show_crossed_arrow and 'image[5.75, 0.5;1,1;x_enchanting_gui_arrow_right_crossed_icon.png]'
+            or 'image[5.75, 0.5;1,1;x_enchanting_gui_arrow_right_icon.png]',
+        -- result
+        'list[nodemeta:' .. spos .. ';result;6.75, 0.5;1, 1;]',
+        'image[6.75, 0.5;1,1;x_enchanting_gui_paper_bg.png]',
+        -- trade
+        'list[nodemeta:' .. spos .. ';trade;6.75, 1.5;1, 1;]',
+        'image[6.75, 1.5;1,1;x_enchanting_gui_paper_trade_bg.png]',
+        -- inventories
+        'list[current_player;main;0, 4.85;8, 1;]',
+        'list[current_player;main;0, 6.08;8, 3;8]',
+        'listring[nodemeta:' .. spos .. ';trade]',
+        'listring[current_player;main]',
+        'listring[nodemeta:' .. spos .. ';sacrifice]',
+        'listring[current_player;main]',
+        'listring[nodemeta:' .. spos .. ';item]',
+        'listring[current_player;main]',
+    }
+
+    formspec[#formspec + 1] = get_hotbar_bg(0, 4.85)
+    formspec[#formspec + 1] = get_list_bg(0, 6.08)
+
+    if show_total_cost then
+        formspec[#formspec + 1] = 'style_type[label;font=mono,bold;textcolor=#4D413A]'
+        formspec[#formspec + 1] = 'label[3.125, 1.5;' .. S('Cost') .. ': ' .. data.total_cost .. ']'
+    end
+
+    -- -- data
+    -- if data then
+    --     for i, slot in ipairs(data.slots) do
+    --         if #slot.final_enchantments > 0 then
+    --             -- show buttons with content
+
+    --             if inv:get_stack('trade', 1):get_count() >= i then
+    --                 ---@diagnostic disable-next-line: codestyle-check
+    --                 formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button.png;slot_' .. i .. ';' .. slot.descriptions.enchantments_desc_masked .. minetest.formspec_escape(' [' .. slot.level .. ']') .. ']'
+    --             else
+    --                 ---@diagnostic disable-next-line: codestyle-check
+    --                 formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';' .. slot.descriptions.enchantments_desc_masked .. minetest.formspec_escape(' [' .. slot.level .. ']') .. ']'
+    --             end
+
+    --             formspec[#formspec + 1] = 'image[2.3,' .. -0.5 + i .. ';1,1;x_enchanting_image_trade_' .. i .. '.png;]'
+    --         else
+    --             -- disabled buttons
+    --             ---@diagnostic disable-next-line: codestyle-check
+    --             formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';]'
+    --         end
+    --     end
+
+    --     model_scroll_is_open = true
+    -- else
+    --     for i = 1, 3, 1 do
+    --         -- disabled buttons
+    --         ---@diagnostic disable-next-line: codestyle-check
+    --         formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';]'
+    --     end
+
+    --     model_scroll_is_open = false
+    -- end
+
+    -- if model_scroll_is_open then
+    --     formspec[#formspec + 1] = model_scroll_open
+    -- else
+    --     formspec[#formspec + 1] = model_scroll_closed
+    -- end
+
+    -- self.form_context[player_name] = {
+    --     data = data,
+    --     pos = pos
+    -- }
 
     return table.concat(formspec, '')
 end

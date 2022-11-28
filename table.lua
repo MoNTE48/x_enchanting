@@ -107,7 +107,7 @@ minetest.register_node('x_enchanting:table', {
             local data = XEnchanting:get_enchantment_data(
                 clicker,
                 #bookshelfs,
-                minetest.registered_tools[item_stack:get_name()]
+                minetest.registered_tools[item_stack:get_name()] or minetest.registered_craftitems[item_stack:get_name()]
             )
             local formspec = XEnchanting:get_formspec(pos, p_name, data)
 
@@ -352,7 +352,7 @@ minetest.register_node('x_enchanting:table', {
             local data = XEnchanting:get_enchantment_data(
                 player,
                 #bookshelfs,
-                minetest.registered_tools[item_stack:get_name()]
+                minetest.registered_tools[item_stack:get_name()] or minetest.registered_craftitems[item_stack:get_name()]
             )
             local formspec = XEnchanting:get_formspec(pos, p_name, data)
 
@@ -387,7 +387,7 @@ minetest.register_node('x_enchanting:table', {
             local data = XEnchanting:get_enchantment_data(
                 player,
                 #bookshelfs,
-                minetest.registered_tools[item_stack:get_name()]
+                minetest.registered_tools[item_stack:get_name()] or minetest.registered_craftitems[item_stack:get_name()]
             )
             local formspec = XEnchanting:get_formspec(pos, p_name, data)
 
@@ -455,7 +455,7 @@ minetest.register_node('x_enchanting:table', {
 })
 
 ----
---- Entity (Scroll)
+--- Entity - Scroll
 ----
 
 minetest.register_entity('x_enchanting:table_scroll', {

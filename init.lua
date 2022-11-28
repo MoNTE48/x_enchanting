@@ -6,6 +6,7 @@ local mod_start_time = minetest.get_us_time()
 
 dofile(path .. '/api.lua')
 dofile(path .. '/table.lua')
+dofile(path .. '/writing_table.lua')
 
 ---Check if string X starts with string Y
 ---@param str string
@@ -19,7 +20,14 @@ minetest.register_on_mods_loaded(function()
     -- Tools override
     for name, tool_def in pairs(minetest.registered_tools) do
         if XEnchanting:has_tool_group(name) then
-            XEnchanting:set_tool_enchantability(tool_def)
+            XEnchanting:set_enchantability(tool_def)
+        end
+    end
+
+    -- Craft items override
+    for name, tool_def in pairs(minetest.registered_craftitems) do
+        if XEnchanting:has_tool_group(name) then
+            XEnchanting:set_enchantability(tool_def)
         end
     end
 

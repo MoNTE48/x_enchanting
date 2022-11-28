@@ -20,6 +20,7 @@
 ---@field walkable boolean If true, objects collide with node.
 ---@field after_dig_node fun(pos: Vector, oldnode: NodeDef, oldmetadata: table, digger: ObjectRef): nil  oldmetadata is in table format. Called after destructing node when node was dug using minetest.node_dig / minetest.dig_node., default: nil
 ---@field paramtype2 string
+---@field palette string Image
 ---@field can_dig fun(pos: Vector, player?: ObjectRef): boolean | nil Returns true if node can be dug, or false if not.default: nil
 ---@field on_rotate fun(pos: Vector, node: table, user: ObjectRef, mode: table, new_param2: string): boolean Only for screwdriver mod.
 ---@field on_construct fun(pos: Vector): nil Node constructor; called after adding node. Can set up metadata and stuff like that. Not called for bulk node placement (i.e. schematics and VoxelManip). default: nil

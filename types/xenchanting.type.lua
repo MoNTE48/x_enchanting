@@ -6,7 +6,7 @@
 ---@field roman_numbers table<number, string>  Convert Arabic numbers to Roman numbers
 ---@field enchantment_defs table<'sharpness' | 'fortune' | 'unbreaking' | 'efficiency' | 'silk_touch' | 'curse_of_vanishing' | 'knockback', EnchantmentDef>
 ---@field has_tool_group fun(self: XEnchanting, name: string): string | boolean Check if tool has one of the known tool groups, returns `false` otherwise.
----@field set_tool_enchantability fun(self: XEnchanting, tool_def: ItemDef): nil Sets `enchantibility` group and values from base table (`XEnchanting.tools_enchantability`) to all registered tools (atching known group names). If tool has already `enchantibility` group defined it will take the defined value insted.
+---@field set_enchantability fun(self: XEnchanting, tool_def: ItemDef): nil Sets `enchantibility` group and values from base table (`XEnchanting.tools_enchantability`) to all registered tools (atching known group names). If tool has already `enchantibility` group defined it will take the defined value insted.
 ---@field get_enchanted_tool_capabilities fun(self: XEnchanting, tool_def: ItemDef, enchantments: Enchantment[]): ToolCapabilitiesDef Applies enchantments to item tool capabilities.
 ---@field set_enchanted_tool fun(self: XEnchanting, pos: Vector, itemstack: ItemStack, level: number, player_name: string): nil Set choosen enchantment and its modified tool capabilities to itemstack and `item` inventory. This will also get new `randomseed`.
 ---@field get_enchantment_data fun(self: XEnchanting, player: ObjectRef, nr_of_bookshelfs: number, tool_def: ItemDef): EnchantmentData Algoritm to get aplicable random enchantments.
@@ -50,5 +50,5 @@
 ---@class EnchantmentDataSlot
 ---@field level number
 ---@field final_enchantments Enchantment[]
----@field tool_cap_data ToolCapabilitiesDef
+---@field tool_cap_data ToolCapabilitiesDef | nil
 ---@field descriptions {["enchantments_desc"]: string, ["enchantments_desc_masked"]: string }
