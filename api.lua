@@ -306,6 +306,17 @@ local function get_table_length(table)
     return length
 end
 
+---Find element v of t satisfying f(v)
+local function tableFind(t, f)
+    for _, v in ipairs(t) do
+      if f(v) then
+        return v
+      end
+    end
+
+    return nil
+end
+
 ---@diagnostic disable-next-line: unused-local
 function XEnchanting.has_tool_group(self, name)
     if minetest.get_item_group(name, 'pickaxe') > 0 then
@@ -767,11 +778,17 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
                         table.remove(possible_enchantments, idx)
                     end
                 end
-
             else
                 local probability = (probability_level + 1) / 50
 
-                table.insert(final_enchantments, rand_ench)
+                local alreadyInTable = tableFind(final_enchantments, function(value)
+                    return value.id == rand_ench.id
+                end)
+
+                if not alreadyInTable then
+                    table.insert(final_enchantments, rand_ench)
+                end
+
                 table.remove(possible_enchantments, rand_ench_idx)
 
                 for idx, value in pairs(possible_enchantments) do
