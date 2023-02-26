@@ -309,9 +309,9 @@ end
 ---Find element v of t satisfying f(v)
 local function tableFind(t, f)
     for _, v in ipairs(t) do
-      if f(v) then
-        return v
-      end
+        if f(v) then
+            return v
+        end
     end
 
     return nil
