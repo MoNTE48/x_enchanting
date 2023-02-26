@@ -178,6 +178,7 @@ end
 ## Optional Dependencies
 
 - xdecor (adjusts conflicting recipe)
+- item_drop (make sure fortune will execute before item_drop mod overrides `handle_node_drops`)
 
 ## License:
 
