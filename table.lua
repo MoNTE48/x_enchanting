@@ -31,6 +31,7 @@ minetest.register_node('x_enchanting:table', {
     drawtype = 'mesh',
     mesh = 'x_enchanting_table.obj',
     tiles = { 'x_enchanting_table.png' },
+    use_texture_alpha = "clip",
     paramtype = 'light',
     paramtype2 = 'facedir',
     walkable = true,
