@@ -19,6 +19,9 @@
 local path = minetest.get_modpath('x_enchanting')
 local mod_start_time = minetest.get_us_time()
 
+local random = math.random
+local vnew = vector.new
+
 dofile(path .. '/api.lua')
 dofile(path .. '/table.lua')
 
@@ -39,13 +42,16 @@ minetest.register_on_mods_loaded(function()
 	end
 
 	-- Ores override - Fortune
+--[[
 	for _, def in pairs(minetest.registered_ores) do
 		if not XEnchanting.registered_ores[def.ore] then
 			XEnchanting.registered_ores[def.ore] = true
 		end
 	end
+]]
 
 	-- Entities override - Looting
+--[[
 	for name, def in pairs(minetest.registered_entities) do
 		if starts_with(name, 'mobs_animal:')
 			or starts_with(name, 'mobs_monster:')
@@ -89,15 +95,15 @@ minetest.register_on_mods_loaded(function()
 
 						if death_by_player and pos then
 							for _, drop in ipairs(def.drops) do
-								if math.random(10, 100) / 100 < looting / (looting + 1) then
+								if random(10, 100) / 100 < looting / (looting + 1) then
 									local drop_min = drop.min or 0
 									local drop_max = drop.max or 0
-									local count = math.random(drop_min, drop_max)
+									local count = random(drop_min, drop_max)
 									local stack = ItemStack({
 										name = drop.name,
 										count = count
 									})
-									local chance = math.random(1, tool_capabilities.max_drop_level)
+									local chance = random(1, tool_capabilities.max_drop_level)
 
 									stack:set_count(stack:get_count() * chance)
 
@@ -147,15 +153,15 @@ minetest.register_on_mods_loaded(function()
 						self._looting_dropped = true
 
 						for _, drop in ipairs(def.drops) do
-							if math.random(10, 100) / 100 < looting / (looting + 1) then
+							if random(10, 100) / 100 < looting / (looting + 1) then
 								local drop_min = drop.min or 0
 								local drop_max = drop.max or 0
-								local count = math.random(drop_min, drop_max)
+								local count = random(drop_min, drop_max)
 								local stack = ItemStack({
 									name = drop.name,
 									count = count
 								})
-								local chance = math.random(1, tool_capabilities.max_drop_level)
+								local chance = random(1, tool_capabilities.max_drop_level)
 
 								stack:set_count(stack:get_count() * chance)
 
@@ -169,6 +175,7 @@ minetest.register_on_mods_loaded(function()
 			end
 		end
 	end
+]]
 end)
 
 ---@diagnostic disable-next-line: unused-local
@@ -216,12 +223,12 @@ function minetest.handle_node_drops(pos, drops, digger)
 			then
 				local tool_capabilities = wield_stack:get_tool_capabilities()
 				local stack = ItemStack(itemstring)
-				local chance = math.random(1, tool_capabilities.max_drop_level)
+				local chance = random(1, tool_capabilities.max_drop_level)
 
 				stack:set_count(stack:get_count() * chance)
 
 				if stack:get_count() > 0 then
-					table.insert(new_drops, stack)
+					new_drops[#new_drops + 1] = stack
 				end
 			end
 		end
@@ -296,7 +303,7 @@ function minetest.calculate_knockback(player, hitter, time_from_last_punch,
 
 			local new_knockback = orig_knockback + (orig_knockback * (ench_knockback / 100))
 
-			player:add_velocity(vector.new(0, new_knockback, 0))
+			player:add_velocity(vnew(0, new_knockback, 0))
 
 			return new_knockback
 		end
@@ -305,7 +312,3 @@ function minetest.calculate_knockback(player, hitter, time_from_last_punch,
 	return old_calculate_knockback(player, hitter, time_from_last_punch,
 	tool_capabilities, dir, distance, damage)
 end
-
-local mod_end_time = (minetest.get_us_time() - mod_start_time) / 1000000
-
-print('[Mod] x_enchanting loaded.. [' .. mod_end_time .. 's]')

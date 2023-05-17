@@ -18,37 +18,42 @@
 
 local S = minetest.get_translator(minetest.get_current_modname())
 
+local floor, max, random, round = math.floor, math.max, math.random, math.round
+local vnew = vector.new
+local tconcat, tindexof, tinsert, tremove = table.concat, table.indexof, table.insert, table.remove
+local esc = minetest.formspec_escape
+
 ---@type XEnchanting
 XEnchanting = {
 	tools_enchantability = {
 		-- picks
 		['default:pick_wood'] = 15,
 		['default:pick_stone'] = 5,
-		['default:pick_bronze'] = 22,
 		['default:pick_steel'] = 14,
-		['default:pick_mese'] = 15,
 		['default:pick_diamond'] = 10,
+		['default:pick_emerald'] = 6,
+		['default:pick_ruby'] = 4,
 		-- shovels
 		['default:shovel_wood'] = 15,
 		['default:shovel_stone'] = 5,
-		['default:shovel_bronze'] = 22,
 		['default:shovel_steel'] = 14,
-		['default:shovel_mese'] = 15,
 		['default:shovel_diamond'] = 10,
+		['default:shovel_emerald'] = 6,
+		['default:shovel_ruby'] = 4,
 		-- axes
 		['default:axe_wood'] = 15,
 		['default:axe_stone'] = 5,
-		['default:axe_bronze'] = 22,
 		['default:axe_steel'] = 14,
-		['default:axe_mese'] = 15,
 		['default:axe_diamond'] = 10,
+		['default:axe_emerald'] = 6,
+		['default:axe_ruby'] = 4,
 		-- swords
 		['default:sword_wood'] = 15,
 		['default:sword_stone'] = 5,
-		['default:sword_bronze'] = 22,
 		['default:sword_steel'] = 14,
-		['default:sword_mese'] = 15,
-		['default:sword_diamond'] = 10
+		['default:sword_diamond'] = 10,
+		['default:sword_emerald'] = 6,
+		['default:sword_ruby'] = 4
 	},
 	roman_numbers = {
 		[1] = 'I',
@@ -135,8 +140,8 @@ XEnchanting = {
 			-- level definition, `level = percentage increase`
 			level_def = {
 				[1] = 100,
-				[2] = 200,
-				[3] = 300
+				[2] = 150,
+				[3] = 200
 			},
 			weight = 5,
 			-- all applicable
@@ -154,11 +159,11 @@ XEnchanting = {
 			},
 			-- level definition, `level = percentage increase`
 			level_def = {
-				[1] = 25,
-				[2] = 30,
-				[3] = 35,
-				[4] = 40,
-				[5] = 45,
+				[1] = 15,
+				[2] = 20,
+				[3] = 25,
+				[4] = 30,
+				[5] = 35,
 			},
 			weight = 10,
 			groups = {
@@ -167,6 +172,7 @@ XEnchanting = {
 				'axe'
 			}
 		},
+--[[
 		silk_touch = {
 			name = S('Silk Touch'),
 			final_level_range = {
@@ -184,6 +190,7 @@ XEnchanting = {
 			},
 			incompatible = { 'fortune' }
 		},
+]]
 		curse_of_vanishing = {
 			name = S('Curse of Vanishing'),
 			final_level_range = {
@@ -276,12 +283,6 @@ XEnchanting = {
 	},
 	form_context = {},
 	player_seeds = {},
-	scroll_animations = {
-		scroll_open = { { x = 1, y = 40 }, 80, 0, false },
-		scroll_close = { { x = 45, y = 84 }, 80, 0, false },
-		scroll_open_idle = { { x = 41, y = 42 }, 0, 0, false },
-		scroll_closed_idle = { { x = 43, y = 44 }, 0, 0, false }
-	},
 	registered_ores = {}
 }
 
@@ -506,8 +507,8 @@ function XEnchanting.get_enchanted_descriptions(self, enchantments)
 	end
 
 	enchantments_desc = '\n' .. minetest.colorize('#AE81FF', S('Enchanted'))
-		.. '\n' .. table.concat(enchantments_desc, '\n')
-	enchantments_desc_masked = table.concat(enchantments_desc_masked, '') .. '..?'
+		.. '\n' .. tconcat(enchantments_desc, '\n')
+	enchantments_desc_masked = tconcat(enchantments_desc_masked, '') .. '..?'
 
 	return {
 		enchantments_desc = enchantments_desc,
@@ -547,15 +548,20 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
 	end
 
 	stack_meta:set_tool_capabilities(capabilities)
-	stack_meta:set_string('description', itemstack:get_description() .. '\n' .. description)
-	stack_meta:set_string('short_description', S('Enchanted') .. ' ' .. itemstack:get_short_description())
+--	stack_meta:set_string('description', itemstack:get_description() .. '\n' .. description)
+--	stack_meta:set_string('short_description', S('Enchanted') .. ' ' .. itemstack:get_short_description())
+	stack_meta:set_string('enchant_description', description)
+	stack_meta:set_string("description", toolranks.create_description(
+		itemstack:get_short_description(),
+		(tonumber(stack_meta:get_string("dug")) or 0),
+		description))
 	stack_meta:set_int('is_enchanted', 1)
 	stack_meta:set_string('x_enchanting', minetest.serialize(final_enchantments_meta))
 
 	inv:set_stack('item', 1, itemstack)
 
 	local trade_stack = inv:get_stack('trade', 1)
-	trade_stack:take_item(level)
+	trade_stack:take_item(level * 16) -- 2
 	inv:set_stack('trade', 1, trade_stack)
 
 	-- set new seed
@@ -588,6 +594,7 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
 		glow = 1
 	}
 
+--[[
 	if minetest.has_feature({ dynamic_add_media_table = true, particlespawner_tweenable = true }) then
 		-- new syntax, after v5.6.0
 		particlespawner_def = {
@@ -619,6 +626,7 @@ function XEnchanting.set_enchanted_tool(self, pos, itemstack, level, player_name
 			glow = 1
 		}
 	end
+	]]
 
 	minetest.add_particlespawner(particlespawner_def)
 end
@@ -661,10 +669,10 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 	----
 
 	-- Base enchantment
-	local base = math.random(1, 8) + math.floor(_nr_of_bookshelfs / 2) + math.random(0, _nr_of_bookshelfs)
-	local top_slot_base_level = math.floor(math.max(base / 3, 1))
-	local middle_slot_base_level = math.floor((base * 2) / 3 + 1)
-	local bottom_slot_base_level = math.floor(math.max(base, _nr_of_bookshelfs * 2))
+	local base = random(1, 8) + floor(_nr_of_bookshelfs / 2) + random(0, _nr_of_bookshelfs)
+	local top_slot_base_level = floor(max(base / 3, 1))
+	local middle_slot_base_level = floor((base * 2) / 3 + 1)
+	local bottom_slot_base_level = floor(max(base, _nr_of_bookshelfs * 2))
 
 	for i, slot_lvl in ipairs({ top_slot_base_level, middle_slot_base_level, bottom_slot_base_level }) do
 		----
@@ -675,13 +683,13 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 		-- Applying modifiers to the enchantment level
 		local enchantability = minetest.get_item_group(tool_def.name, 'enchantability')
 		-- Generate a random number between 1 and 1+(enchantability/2), with a triangular distribution
-		local rand_enchantability = 1 + math.random(enchantability / 4 + 1) + math.random(enchantability / 4 + 1)
+		local rand_enchantability = 1 + random(enchantability / 4 + 1) + random(enchantability / 4 + 1)
 		-- Choose the enchantment level
 		local k = chosen_enchantment_level + rand_enchantability
 		-- A random bonus, between .85 and 1.15
-		local rand_bonus_percent = 1 + ((math.random(0, 99) / 100) + (math.random(0, 99) / 100) - 1) * 0.15
+		local rand_bonus_percent = 1 + ((random(0, 99) / 100) + (random(0, 99) / 100) - 1) * 0.15
 		-- Finally, we calculate the level
-		local final_level = math.round(k * rand_bonus_percent)
+		local final_level = round(k * rand_bonus_percent)
 
 		if final_level < 1 then
 			final_level = 1
@@ -706,7 +714,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 				local max = final_level_range[2]
 
 				if final_level >= min and final_level <= max then
-					table.insert(levels, level)
+					tinsert(levels, level)
 				end
 			end
 
@@ -714,7 +722,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 			local level = levels[#levels]
 
 			if level then
-				table.insert(possible_enchantments, {
+				tinsert(possible_enchantments, {
 					id = enchantment_name,
 					value = enchantment_def.level_def[level],
 					level = level,
@@ -739,7 +747,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 		end
 
 		-- Pick a random integer in the half range [0; total_weight / 2] as a number `rand_weight`
-		local rand_weight = math.random(0, total_weight / 2)
+		local rand_weight = random(0, total_weight / 2)
 		-- local probability = (final_level + 1) / 50
 		local probability_level = final_level
 		---@type Enchantment[]
@@ -747,7 +755,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 
 		for _, enchantment in pairs(possible_enchantments) do
 			if not enchantment.secondary then
-				table.insert(possible_enchantments_excl_secodnary, enchantment)
+				tinsert(possible_enchantments_excl_secodnary, enchantment)
 			end
 		end
 
@@ -755,27 +763,27 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 		-- Iterate through each enchantment in the list, subtracting its weight from `rand_weight`.
 		-- If `rand_weight` is now negative, select the current enchantment.
 		for j = 1, #possible_enchantments, 1 do
-			local rand_ench_idx = math.random(1, #possible_enchantments)
+			local rand_ench_idx = random(1, #possible_enchantments)
 			local rand_ench = possible_enchantments[rand_ench_idx]
 
 			if j == 1 then
 				-- First pick
 				-- Dont add cursed/secondary enchantment as first pick
-				rand_ench_idx = math.random(1, #possible_enchantments_excl_secodnary)
+				rand_ench_idx = random(1, #possible_enchantments_excl_secodnary)
 				rand_ench = possible_enchantments_excl_secodnary[rand_ench_idx]
 
-				table.insert(final_enchantments, rand_ench)
+				tinsert(final_enchantments, rand_ench)
 
 				for idx, value in pairs(possible_enchantments) do
 					if rand_ench.id == value.id then
-						table.remove(possible_enchantments, idx)
+						tremove(possible_enchantments, idx)
 					end
 
 					-- remove incomaptible enchantments
 					if rand_ench.incompatible
-						and table.indexof(rand_ench.incompatible, value.id) ~= -1
+						and tindexof(rand_ench.incompatible, value.id) ~= -1
 					then
-						table.remove(possible_enchantments, idx)
+						tremove(possible_enchantments, idx)
 					end
 				end
 			else
@@ -786,22 +794,22 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 				end)
 
 				if not alreadyInTable then
-					table.insert(final_enchantments, rand_ench)
+					tinsert(final_enchantments, rand_ench)
 				end
 
-				table.remove(possible_enchantments, rand_ench_idx)
+				tremove(possible_enchantments, rand_ench_idx)
 
 				for idx, value in pairs(possible_enchantments) do
 					-- remove incomaptible enchantments
 					if rand_ench.incompatible
-						and table.indexof(rand_ench.incompatible, value.id) ~= -1
+						and tindexof(rand_ench.incompatible, value.id) ~= -1
 					then
-						table.remove(possible_enchantments, idx)
+						tremove(possible_enchantments, idx)
 					end
 				end
 
 				-- With probability (`final_level` + 1) / 50, keep going. Otherwise, stop picking bonus enchantments.
-				local rand_probability = math.random()
+				local rand_probability = random()
 
 				if rand_probability < probability then
 					-- Divide the `final_level` in half, rounded down
@@ -825,7 +833,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 		local tool_cap_data = self:get_enchanted_tool_capabilities(tool_def, final_enchantments)
 		local descriptions = self:get_enchanted_descriptions(final_enchantments)
 
-		table.insert(data.slots, i, {
+		tinsert(data.slots, i, {
 			level = slot_lvl,
 			final_enchantments = final_enchantments,
 			tool_cap_data = tool_cap_data,
@@ -839,8 +847,8 @@ end
 local function get_hotbar_bg(x, y)
 	local out = ''
 
-	for i = 0, 7, 1 do
-		out = out .. 'image[' .. x + i .. ',' .. y .. ';1,1;x_enchanting_gui_hb_bg.png]'
+	for i = 0, 8 do
+		out = out .. 'image[' .. x + i .. ',' .. y .. ';1,1;formspec_cell.png]'
 	end
 
 	return out
@@ -850,59 +858,52 @@ local function get_list_bg(x, y)
 	local out = ''
 
 	for row = 0, 2, 1 do
-		for i = 0, 7, 1 do
-			out = out .. 'image[' .. x + i .. ',' .. y + row .. ';1,1;x_enchanting_gui_slot_bg.png]'
+		for i = 0, 8, 1 do
+			out = out .. 'image[' .. x + i .. ',' .. y + row .. ';1,1;formspec_cell.png]'
 		end
 	end
 
 	return out
 end
 
-local function get_formspec_bg(player_name)
-	local info = minetest.get_player_information(player_name)
-	local bg = 'background[5,5;1,1;x_enchanting_gui_formbg.png;true]'
-
-	if info.formspec_version > 1 then
-		bg = 'background9[5,5;1,1;x_enchanting_gui_formbg.png;true;10]'
-	end
-
-	return bg
-end
-
 function XEnchanting.get_formspec(self, pos, player_name, data)
 	local spos = pos.x .. ',' .. pos.y .. ',' .. pos.z
 	local inv = minetest.get_meta(pos):get_inventory()
-	---@diagnostic disable-next-line: codestyle-check
-	local model_scroll_open = 'model[0,0;2,3;x_enchanting_table;x_enchanting_scroll.b3d;x_enchanting_scroll_mesh.png,x_enchanting_scroll_handles_mesh.png,x_enchanting_scroll_mesh.png;89,0;false;false;' .. self.scroll_animations.scroll_open_idle[1].x .. ',' .. self.scroll_animations.scroll_open_idle[1].y .. ';0]'
-	---@diagnostic disable-next-line: codestyle-check
-	local model_scroll_closed = 'model[0,0;2,3;x_enchanting_table;x_enchanting_scroll.b3d;x_enchanting_scroll_mesh.png,x_enchanting_scroll_handles_mesh.png,x_enchanting_scroll_mesh.png;89,0;false;false;' .. self.scroll_animations.scroll_closed_idle[1].x .. ',' .. self.scroll_animations.scroll_closed_idle[1].y .. ';0]'
-	local model_scroll_is_open
+
+	local tool_icon = ''
+	if inv:get_stack('item', 1):is_empty() then
+		tool_icon = '^x_enchanting_tool_icon.png'
+	end
 
 	local formspec = {
-		'size[8,9]',
+		'size[9,8.75]',
 		'bgcolor[#080808BB;true]',
-		'listcolors[#FFFFFF00;#FFFFFF1A;#FFFFFF00;#30434C;#FFF]',
-		get_formspec_bg(player_name),
-		'style_type[label;font=mono,bold]',
-		'style[slot_1,slot_2,slot_3;font=mono,bold;textcolor=#4D413A]',
-		'label[0, 0;' .. S('Enchant') .. ']',
+		'background9[5,5;1,1;x_enchanting_gui_formbg.png;true;10]',
+		'label[-0.05,-0.1;' .. S('Enchanting Table') .. ']',
+		default.gui_close_btn('8.45,0.05'),
 		-- item
-		'list[nodemeta:' .. spos .. ';item;0, 2.5;1, 1;]',
-		'image[0, 2.5;1,1;x_enchanting_gui_cloth_bg.png]',
+		'list[nodemeta:' .. spos .. ';item;0, 2.5;1,1;]',
+		'image[0, 2.5;1,1;formspec_cell_s.png' .. tool_icon .. ']',
 		-- trade
-		'list[nodemeta:' .. spos .. ';trade;1, 2.5;1, 1;]',
-		'image[1, 2.5;1,1;x_enchanting_gui_cloth_trade_bg.png]',
+		'list[nodemeta:' .. spos .. ';trade;1,2.5;1,1;]',
+		'image[1, 2.5;1,1;formspec_cell_s.png^x_enchanting_gui_cloth_trade_bg.png]',
+
 		-- inventories
-		'list[current_player;main;0, 4.85;8, 1;]',
-		'list[current_player;main;0, 6.08;8, 3;8]',
+		'style_type[label;font_size=*1.2]' ..
+		'label[0,3.9;' .. S('Inventory') .. ']' ..
+		'style_type[label;font_size=]' ..
+
+		'list[current_player;main;0,4.6;9,3;9]',
+		'list[current_player;main;0,7.8;9,1;]',
+
 		'listring[nodemeta:' .. spos .. ';trade]',
 		'listring[current_player;main]',
 		'listring[nodemeta:' .. spos .. ';item]',
 		'listring[current_player;main]',
 	}
 
-	formspec[#formspec + 1] = get_hotbar_bg(0, 4.85)
-	formspec[#formspec + 1] = get_list_bg(0, 6.08)
+	formspec[#formspec + 1] = get_hotbar_bg(0, 7.8)
+	formspec[#formspec + 1] = get_list_bg(0, 4.6)
 
 	-- data
 	if data then
@@ -910,43 +911,35 @@ function XEnchanting.get_formspec(self, pos, player_name, data)
 			if #slot.final_enchantments > 0 then
 				-- show buttons with content
 
-				if inv:get_stack('trade', 1):get_count() >= i then
+				if inv:get_stack('trade', 1):get_count() >= (i * 16) then -- 2
 					---@diagnostic disable-next-line: codestyle-check
-					formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button.png;slot_' .. i .. ';' .. slot.descriptions.enchantments_desc_masked .. minetest.formspec_escape(' [' .. slot.level .. ']') .. ']'
+					formspec[#formspec + 1] = 'image_button[3.38,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button.png;slot_' .. i .. ';' .. slot.descriptions.enchantments_desc_masked .. esc(' [' .. slot.level .. ']') .. ']'
 				else
 					---@diagnostic disable-next-line: codestyle-check
-					formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';' .. slot.descriptions.enchantments_desc_masked .. minetest.formspec_escape(' [' .. slot.level .. ']') .. ']'
+					formspec[#formspec + 1] = 'image_button[3.38,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';' .. slot.descriptions.enchantments_desc_masked .. esc(' [' .. slot.level .. ']') .. ']'
 				end
 
-				formspec[#formspec + 1] = 'image[2.3,' .. -0.5 + i .. ';1,1;x_enchanting_image_trade_' .. i .. '.png;]'
+				formspec[#formspec + 1] = 'image[2.55,' .. -0.5 + i .. ';1,1;x_enchanting_image_trade_' .. i .. '.png;]'
 			else
 				-- disabled buttons
 				---@diagnostic disable-next-line: codestyle-check
 				formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';]'
 			end
 		end
-
-		model_scroll_is_open = true
 	else
 		for i = 1, 3, 1 do
 			-- disabled buttons
 			---@diagnostic disable-next-line: codestyle-check
 			formspec[#formspec + 1] = 'image_button[3.125,' .. -0.5 + i .. ';5.125,1;x_enchanting_image_button_disabled.png;slot_' .. i .. ';]'
 		end
-
-		model_scroll_is_open = false
 	end
 
-	if model_scroll_is_open then
-		formspec[#formspec + 1] = model_scroll_open
-	else
-		formspec[#formspec + 1] = model_scroll_closed
-	end
+	formspec[#formspec + 1] = 'item_image[0.1,0.5;2,2;charoit:charoit]'
 
 	self.form_context[player_name] = {
 		data = data,
 		pos = pos
 	}
 
-	return table.concat(formspec, '')
+	return tconcat(formspec, '')
 end
