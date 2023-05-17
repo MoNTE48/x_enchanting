@@ -184,7 +184,7 @@ end
 
 ### Code
 
-GNU Lesser General Public License v2.1 or later (see included LICENSE file)
+GNU Lesser General Public License v3.0 or later (see included LICENSE file)
 
 ### Textures
 
