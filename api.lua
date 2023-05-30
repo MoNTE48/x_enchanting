@@ -882,11 +882,13 @@ function XEnchanting.get_formspec(self, pos, player_name, data)
 		'label[-0.05,-0.1;' .. S('Enchanting Table') .. ']',
 		default.gui_close_btn('8.45,0.05'),
 		-- item
+		"style_type[list;bgimg=;bgimg_hovered=]",
 		'list[nodemeta:' .. spos .. ';item;0, 2.5;1,1;]',
 		'image[0, 2.5;1,1;formspec_cell_s.png' .. tool_icon .. ']',
 		-- trade
 		'list[nodemeta:' .. spos .. ';trade;1,2.5;1,1;]',
 		'image[1, 2.5;1,1;formspec_cell_s.png^x_enchanting_gui_cloth_trade_bg.png]',
+		default.list_style,
 
 		-- inventories
 		'style_type[label;font_size=*1.2]' ..
