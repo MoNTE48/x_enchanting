@@ -653,7 +653,7 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 	for enchantment_name, enchantment_def in pairs(self.enchantment_defs) do
 		if not enchantment_def.groups then
 			group_enchantments[enchantment_name] = enchantment_def
-		else
+		elseif tool_def then
 			---@diagnostic disable-next-line: unused-local
 			for i, group in ipairs(enchantment_def.groups) do
 				if minetest.get_item_group(tool_def.name, group) > 0 then
