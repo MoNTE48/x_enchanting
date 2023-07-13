@@ -844,28 +844,6 @@ function XEnchanting.get_enchantment_data(self, player, nr_of_bookshelfs, tool_d
 	return data
 end
 
-local function get_hotbar_bg(x, y)
-	local out = ''
-
-	for i = 0, 8 do
-		out = out .. 'image[' .. x + i .. ',' .. y .. ';1,1;formspec_cell.png]'
-	end
-
-	return out
-end
-
-local function get_list_bg(x, y)
-	local out = ''
-
-	for row = 0, 2, 1 do
-		for i = 0, 8, 1 do
-			out = out .. 'image[' .. x + i .. ',' .. y + row .. ';1,1;formspec_cell.png]'
-		end
-	end
-
-	return out
-end
-
 function XEnchanting.get_formspec(self, pos, player_name, data)
 	local spos = pos.x .. ',' .. pos.y .. ',' .. pos.z
 	local inv = minetest.get_meta(pos):get_inventory()
@@ -903,9 +881,6 @@ function XEnchanting.get_formspec(self, pos, player_name, data)
 		'listring[nodemeta:' .. spos .. ';item]',
 		'listring[current_player;main]',
 	}
-
-	formspec[#formspec + 1] = get_hotbar_bg(0, 7.8)
-	formspec[#formspec + 1] = get_list_bg(0, 4.6)
 
 	-- data
 	if data then
