@@ -16,7 +16,7 @@
 	License along with this library; if not, write to juraj.vajda@gmail.com
 --]]
 
-local S = minetest.get_translator(minetest.get_current_modname())
+local S = minetest.get_translator('x_enchanting')
 
 local floor, max, random, round = math.floor, math.max, math.random, math.round
 local vnew = vector.new
@@ -283,7 +283,8 @@ XEnchanting = {
 	},
 	form_context = {},
 	player_seeds = {},
-	registered_ores = {}
+	registered_ores = {},
+	S = S
 }
 
 ---Merge two tables with key/value pair

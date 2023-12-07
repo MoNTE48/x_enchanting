@@ -16,7 +16,7 @@
 	License along with this library; if not, write to juraj.vajda@gmail.com
 --]]
 
-local S = minetest.get_translator(minetest.get_current_modname())
+local S = XEnchanting.S
 
 local random, pi = math.random, math.pi
 local vdistance, vnew = vector.distance, vector.new
